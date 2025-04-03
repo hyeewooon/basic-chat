@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Message } from "./model";
 
-const webSocket = new WebSocket("ws://localhost:8080");
+const webSocket = new WebSocket(process.env.NEXT_PUBLIC_WEBSOCKET_URL ?? "");
 
 function useSocket() {
   const [value, setValue] = useState("");
