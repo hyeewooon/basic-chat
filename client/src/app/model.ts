@@ -1,5 +1,5 @@
 export interface Message {
-  id: string;
-  type: "WELCOME" | "";
-  data: string;
+  type: "WELCOME" | "CHAT" | "ME";
+  name: string;
+  msg: string;
 }
