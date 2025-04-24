@@ -4,6 +4,7 @@ import type { Message } from "./model";
 const webSocket = new WebSocket(process.env.NEXT_PUBLIC_WEBSOCKET_URL ?? "");
 
 function useSocket() {
+  const [isConnected, setConnected] = useState(false);
   const [value, setValue] = useState("");
   const [username, setUsername] = useState("");
   const [list, setList] = useState<Message[]>([]);
@@ -11,39 +12,44 @@ function useSocket() {
   useEffect(() => {
     if (!webSocket) return;
 
-    // 처음 소켓이 연결됨
     if (webSocket.readyState === WebSocket.OPEN) {
       console.log("WebSocket이 이미 열려 있음.");
-    } else {
-      webSocket.onopen = () => {
-        console.log("open", webSocket.protocol);
-      };
+      setConnected(true);
     }
 
-    // 서버에서 온 메시지
-    webSocket.onmessage = (e: MessageEvent<string>) => {
-      const { type, name, msg }: Message = JSON.parse(e.data);
-
-      const listItem: Message = {
-        type,
-        name,
-        msg: type === "WELCOME" ? `${name} joins the chat` : msg,
-      };
-
-      setList((prev) => [...prev, listItem]);
-    };
-
-    // 소켓 연결이 종료됨
-    webSocket.onclose = () => {
-      console.log("close");
-    };
+    webSocket.onopen = handleOpen;
+    webSocket.onmessage = handleMessage;
+    webSocket.onclose = handleClose;
 
     return () => {
-      if (webSocket) {
-        webSocket.close();
-      }
+      webSocket.onopen = null;
+      webSocket.onmessage = null;
+      webSocket.onclose = null;
+      webSocket.close();
     };
   }, []);
+
+  const handleOpen = () => {
+    console.log("WebSocket 연결됨");
+    setConnected(true);
+  };
+
+  const handleMessage = (e: MessageEvent<string>) => {
+    const { type, name, msg }: Message = JSON.parse(e.data);
+
+    const listItem: Message = {
+      type,
+      name,
+      msg: type === "WELCOME" ? `${name} joins the chat` : msg,
+    };
+
+    setList((prev) => [...prev, listItem]);
+  };
+
+  const handleClose = () => {
+    console.log("WebSocket 연결 종료");
+    setConnected(false);
+  };
 
   function changeInput(e: React.ChangeEvent<HTMLInputElement>) {
     setValue(e.target.value);
@@ -86,6 +92,7 @@ function useSocket() {
   }
 
   return {
+    isConnected,
     username,
     value,
     list,

@@ -4,8 +4,15 @@ import clsx from "clsx";
 import useSocket from "./useSocket";
 
 export default function Home() {
-  const { username, value, list, changeInput, submitUsername, submitChat } =
-    useSocket();
+  const {
+    isConnected,
+    username,
+    value,
+    list,
+    changeInput,
+    submitUsername,
+    submitChat,
+  } = useSocket();
 
   return (
     <div className="w-full h-screen flex items-center justify-center">
@@ -18,15 +25,21 @@ export default function Home() {
           <div>
             <form className="flex">
               <input
-                className="w-full p-2 border border-gray-200 focus-visible:outline-none"
-                placeholder="Enter Your Nickname"
+                className="w-full p-2 border border-gray-200 focus-visible:outline-none disabled:border-gray-500"
+                placeholder={
+                  isConnected
+                    ? "닉네임을 입력하세요"
+                    : "채팅 연결 중입니다. 조금만 기다려 주세요."
+                }
                 onChange={changeInput}
                 value={value}
+                disabled={!isConnected}
               />
               <button
                 type="submit"
-                className="flex-none w-[70px] p-2 ml-2 bg-blue-300 text-white font-bold rounded-sm cursor-pointer"
+                className="flex-none w-[70px] p-2 ml-2 bg-blue-300 text-white font-bold rounded-sm cursor-pointer disabled:opacity-50"
                 onClick={submitUsername}
+                disabled={!isConnected}
               >
                 로그인
               </button>
